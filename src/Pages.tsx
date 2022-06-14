@@ -497,38 +497,36 @@ export default class Page {
     create_jsx_button({ text = "Button", container = "buttons", callback = () => {}, id = null, className = "", disabled = false }: JSX_Button_Parameters) : JSX.Element {
         console.debug("Creating new jsx button");
 
-        className = "btn btn-primary userscript_btn " + className;
-        let button = <React.StrictMode><div className="Buttons">
-            <header className="App-header">
-                <MButton id={id} className={className} variant="contained" onClick={() => { Notify.debug(`clicked ${id}`); callback(); }}>{text}</MButton>
-            </header>
-        </div></React.StrictMode>;
-        return button;
+        const button = this.create_jsx_button_internal({ text: text, container: container, callback: callback, id: id, className: className, disabled: disabled });
+        const jsx = this.create_jsx_button_wrap(button);
 
-        /** Create a new wrapper so we don't replace the container contents */
-        /**
-        let button_container = this.get_element("button container", container);
-        let wrap = $('<span class="react-button-wrap"></span>');
-        wrap.appendTo(button_container);
-
-        className = "btn btn-primary userscript_btn " + className;
-        let button = <MuiButton id={id} className={className} onClick={() => { Notify.debug(`Clicked ${id}`); callback();}} variant="contained">{text}</MuiButton>;
-        if (typeof container !== "undefined") {
-            this.render(button, wrap);
-        }
-        return button;
-        */
+        return jsx;
     }
 
-    create_jsx_buttons(list: Array<JSX_Button_Parameters>): Array<JSX.Element> {
+    create_jsx_button_wrap( button : JSX.Element | Array<JSX.Element> ) {
+        const jsx = <React.StrictMode><div className="Buttons">
+            <header className="App-header">
+                { button }
+            </header>
+        </div></React.StrictMode>;
+
+        return jsx;
+    }
+
+    create_jsx_button_internal({ text = "Button", container = "buttons", callback = () => { }, id = null, className = "", disabled = false }: JSX_Button_Parameters): JSX.Element {
+        className = "btn btn-primary userscript_btn " + className;
+        return <MButton id={id} className={className} variant="contained" onClick={() => { Notify.debug(`clicked ${id}`); callback(); }}>{text}</MButton>
+    }
+
+    create_jsx_buttons(list: Array<JSX_Button_Parameters>): JSX.Element {
         let buttons: Array<JSX.Element> = new Array<JSX.Element>();
 
         for (let data of list) {
-            let button = this.create_jsx_button(data);
+            let button = this.create_jsx_button_internal(data);
             buttons.push(button);
         }
 
-        return buttons;
+        return this.create_jsx_button_wrap( buttons );
     }
 
     /**
